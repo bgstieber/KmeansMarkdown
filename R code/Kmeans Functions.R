@@ -18,15 +18,32 @@ kmeansBIC <- function(fit){
   return(D + log(n) * m * k)
 }
 
-## kmeans2 function
+Criteria='BIC' ##Chose AIC or BIC
 
-kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE){
+##Define AIC and/or BIC function
+kmeans_IC <- function(fit, criteria='AIC'){
+  m = ncol(fit$centers) 
+  n = length(fit$cluster)
+  k = nrow(fit$centers)
+  D = fit$tot.withinss
+  if (Criteria=='AIC')
+  {return(D + 2*m*k)}
+  if (Criteria=='BIC')
+  {return(D + log(n) * m * k)}
+
+}
+
+
+kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE, Criteria){
   
   #fit kmeans for each center
   all_kmeans <- lapply(center_range, 
                        FUN = function(k) 
                          kmeans(data, center = k, iter.max = iter.max, nstart = nstart))
+  #AIC or BIC
+  all_IC <- sapply(all_kmeans, kmeans_IC)
   
+  #NOTE: Still leaving AIC and BIC until AIC/BIC function works properly
   #extract AIC from each
   all_aic <- sapply(all_kmeans, kmeansAIC)
   #extract BIC from each
@@ -40,7 +57,10 @@ kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE){
   #put in data.frame
   clust_res <- 
     data.frame('Clusters' = center_range, 
-               'AIC' = all_aic, 
+               Criteria = all_IC,  #NOTE: Here I want it to actually print the criteria that has been
+                                   #chosen but instead it just prints "Criteria", is there a way to
+                                   #tell it I mean the specific thing stored as Criteria? 
+               'AIC' = all_aic,   
                'BIC' = all_bic, 
                'WSS' = all_wss,
                'BSS' = btwn_ss,
@@ -49,7 +69,7 @@ kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE){
   if(plot){
     par(mfrow = c(2,2))
     with(clust_res,{
-      plot(Clusters, AIC)
+      plot(Clusters, AIC)  #NOTE: Have not yet altered this portion to correspond to AIC/BIC choice
       plot(Clusters, BIC)
       plot(Clusters, WSS, ylab = 'Within Cluster SSE')
       plot(Clusters, BSS / TSS, ylab = 'Prop of Var. Explained')
@@ -60,6 +80,7 @@ kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE){
   
 }
 
+test<- kmeans2(readiness.shuff, c(4:6), 50, 50, plot=FALSE, Criteria = Criteria)
 
 ##kmeans_viz function
 
