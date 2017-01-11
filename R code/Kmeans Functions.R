@@ -21,9 +21,9 @@ kmeansBIC <- function(fit){
 
 ##Define AIC and/or BIC function
 kmeans_IC <- function(fit, criteria = 'AIC'){
-  criteria <- toupper(critera) #capitalize
+  criteria <- toupper(criteria) #capitalize
   #stop function if neither option specified
-  if(criteria %in% c('AIC', 'BIC')){
+  if(! criteria %in% c('AIC', 'BIC')){
     stop("Please specify one of either 'AIC' or 'BIC' for criteria")
   }
   #do the calculation
@@ -40,7 +40,7 @@ kmeans_IC <- function(fit, criteria = 'AIC'){
 }
 
 
-kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE, Criteria){
+kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE){
   
   #fit kmeans for each center
   all_kmeans <- lapply(center_range, 
