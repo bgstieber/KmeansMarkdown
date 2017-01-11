@@ -18,18 +18,23 @@ kmeansBIC <- function(fit){
   return(D + log(n) * m * k)
 }
 
-Criteria='BIC' ##Chose AIC or BIC
 
 ##Define AIC and/or BIC function
-kmeans_IC <- function(fit, criteria='AIC'){
-  m = ncol(fit$centers) 
-  n = length(fit$cluster)
-  k = nrow(fit$centers)
-  D = fit$tot.withinss
-  if (Criteria=='AIC')
-  {return(D + 2*m*k)}
-  if (Criteria=='BIC')
-  {return(D + log(n) * m * k)}
+kmeans_IC <- function(fit, criteria = 'AIC'){
+  criteria <- toupper(critera) #capitalize
+  #stop function if neither option specified
+  if(criteria %in% c('AIC', 'BIC')){
+    stop("Please specify one of either 'AIC' or 'BIC' for criteria")
+  }
+  m <- ncol(fit$centers) 
+  n <- length(fit$cluster)
+  k <- nrow(fit$centers)
+  D <- fit$tot.withinss
+  if (criteria == 'AIC'){
+    return(D + 2 * m * k)
+  }else{
+    return(D + log(n) * m * k)
+  }
 
 }
 
@@ -40,14 +45,11 @@ kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE, Criteria)
   all_kmeans <- lapply(center_range, 
                        FUN = function(k) 
                          kmeans(data, center = k, iter.max = iter.max, nstart = nstart))
-  #AIC or BIC
-  all_IC <- sapply(all_kmeans, kmeans_IC)
-  
-  #NOTE: Still leaving AIC and BIC until AIC/BIC function works properly
-  #extract AIC from each
-  all_aic <- sapply(all_kmeans, kmeansAIC)
-  #extract BIC from each
-  all_bic <- sapply(all_kmeans, kmeansBIC)
+
+  #extract AIC 
+  all_aic <- sapply(all_kmeans, kmeans_IC)
+  #extract BIC
+  all_bic <- sapply(all_kmeans, kmeans_IC, criteria = 'BIC')
   #extract tot.withinss
   all_wss <- sapply(all_kmeans, FUN = function(fit) fit$tot.withinss)
   #extract between ss
@@ -57,9 +59,6 @@ kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE, Criteria)
   #put in data.frame
   clust_res <- 
     data.frame('Clusters' = center_range, 
-               Criteria = all_IC,  #NOTE: Here I want it to actually print the criteria that has been
-                                   #chosen but instead it just prints "Criteria", is there a way to
-                                   #tell it I mean the specific thing stored as Criteria? 
                'AIC' = all_aic,   
                'BIC' = all_bic, 
                'WSS' = all_wss,
@@ -80,7 +79,7 @@ kmeans2 <- function(data, center_range, iter.max, nstart, plot = TRUE, Criteria)
   
 }
 
-test<- kmeans2(readiness.shuff, c(4:6), 50, 50, plot=FALSE, Criteria = Criteria)
+# test<- kmeans2(readiness.shuff, c(4:6), 50, 50, plot=FALSE, Criteria = Criteria)
 
 ##kmeans_viz function
 
