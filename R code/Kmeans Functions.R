@@ -26,6 +26,7 @@ kmeans_IC <- function(fit, criteria = 'AIC'){
   if(criteria %in% c('AIC', 'BIC')){
     stop("Please specify one of either 'AIC' or 'BIC' for criteria")
   }
+  #do the calculation
   m <- ncol(fit$centers) 
   n <- length(fit$cluster)
   k <- nrow(fit$centers)
